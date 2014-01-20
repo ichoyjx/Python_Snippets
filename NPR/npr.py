@@ -5,14 +5,13 @@ from urllib2 import Request, urlopen, URLError
 
 def npr():
 
-    request = Request('http://placekitten.com/')
-
-try:
-    response = urlopen(request)
-    kittens = response.read()
-    print kittens[559:1000]
-except URLError, e:
-    print 'No kittez. Got an error code:', e
+    try:
+        request = Request('http://placekitten.com/')
+        response = urlopen(request)
+        kittens = response.read()
+        print kittens[559:1000]
+    except URLError, e:
+        print 'No kittez. Got an error code:', e
 
 # main
 def main():
