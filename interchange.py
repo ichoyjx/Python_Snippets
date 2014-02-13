@@ -63,7 +63,7 @@ def compare(file1, file2):
         f_r2.close()
         f_w.close()
 
-# compile, execute, compare outputs    
+# compile, execute, compare outputs
 def compile(filename, flag):
     command = 'uhf90 -O3 -LNO:minvar=off '
     if flag: # add debug options
@@ -80,7 +80,7 @@ def compile(filename, flag):
 
     # compare the 'matrix_unroll_tmp' with 'unroll_*_ori'
     compare('matrix_unroll_tmp','matrix_' + filename + '_ori')
-    
+
     if flag: # for step
         raw_input("\npress ENTER to continue... ")
 
@@ -93,7 +93,7 @@ def compile_result(pragma):
     for elem in pragma:
         tmp_list.append(elem)
         tmp_result[elem] = 0
-    
+
     f_w_output = open('compile_result', 'a')
     f_w_output.write(str(pos_id) + ',')
     try:
@@ -133,12 +133,12 @@ def compile_result(pragma):
         # no compile Result:... output
         if not compile_flag:
             f_w_output.write('0\n')
-        
+
     finally:
         f_r_result.close()
         f_w_output.close()
     return
-    
+
 # xml parser
 def parser(xml):
     doc = minidom.parse(xml)
@@ -161,16 +161,16 @@ def parser(xml):
             line_nums.append(line_numObj)
             directives.append(directiveObj)
             unroll_sizes.append(unroll_sizeObj)
-        
+
         if len(directives)!=len(line_nums) or len(line_nums)!=len(unroll_sizes):
             print 'Check the correctness of XML file!'
             sys.exit()
-        
+
         for i in range(0, len(line_nums)):
             d_nodes = directives[i].childNodes
             us_nodes = unroll_sizes[i].childNodes
             ln_nodes = line_nums[i].childNodes
-        
+
             for j in range(0, len(d_nodes)):
                 # print line number
                 if ln_nodes[j].nodeType == ln_nodes[j].TEXT_NODE:
@@ -181,9 +181,9 @@ def parser(xml):
                         print '  DIRECTIVE: ' + d_nodes[j].data + ' ' + us_nodes[j].data + '\n'
 
         count += 1
-        
+
 # generate the unroll.xml
-# XML format (indent=2):                
+# XML format (indent=2):
 '''
 <?xml version="1.0" encoding="utf-8" ?>
 <transformation>
@@ -199,7 +199,7 @@ def parser(xml):
     </one_dir>
   </unroll>
   ...
-</transformation>    
+</transformation>
 '''
 def generateXML(src, loop_list): # this function will be very dependent
     src = src.replace('.f', '.xml')
@@ -219,16 +219,16 @@ def generateXML(src, loop_list): # this function will be very dependent
                     xml.write('      <unroll_size>(' + str(size_dict[each_loop]))
                     xml.write(')</unroll_size>\n    </one_dir>\n')
                 xml.write('  </unroll>\n\n')
-            
+
         # end main
         xml.write('</transformation>\n')
     finally:
         xml.close()
     return
 
-# auto_dump will scan the source template code, 
-# replace the unroll size of each loop and execute 
-# the executable file whose output will be compared 
+# auto_dump will scan the source template code,
+# replace the unroll size of each loop and execute
+# the executable file whose output will be compared
 # with the original output result
 def auto_dump(src, dump_list, flag):
     global pos_id
@@ -258,10 +258,10 @@ def auto_dump(src, dump_list, flag):
                         f_w.write('\n')
                 else:
                     f_w.write(line)
-                    
+
             # tell back-end the current pos_id
             f_w_be.write(str(pos_id))
-            
+
         finally:
             f_r.close()
             f_w.close()
@@ -280,7 +280,7 @@ def auto_dump(src, dump_list, flag):
 
         # compare pragma file and result file
         compile_result(pragma)
-        
+
         # update pos_id
         pos_id += 1
 
@@ -296,7 +296,7 @@ def dumper(src, loops, flag):
     global line_num_dict
     tmp_dict = {0:2, 1:4, 2:5, 3:10, 4:3, 5:6} # after key=2, all are unexpected
     for index,elem in enumerate(loop_list):
-        size_dict[elem] = tmp_dict[index] 
+        size_dict[elem] = tmp_dict[index]
         line_num_dict[elem] = 0
 
     # clean the files will be regenerated
@@ -305,7 +305,7 @@ def dumper(src, loops, flag):
     rm('com_result')
     rm('compile_result')
     rm('final_result')
-        
+
     # for a four nested loops, the innermost loop is
     # not allowed to be unrolled, so I will add the
     # directives before first three loops: 2, 4, 5
@@ -316,9 +316,9 @@ def dumper(src, loops, flag):
         auto_dump(src, dump_list, flag)
 
     # generate the unroll.xml
-    generateXML(src, loop_list)        
+    generateXML(src, loop_list)
     return
-    
+
 # main function
 def main():
     if len(sys.argv)<2 or len(sys.argv)>4:
@@ -339,7 +339,7 @@ def main():
 
     os.system('python cmp.py com_result compile_result > final_result')
     return
-        
-# call main        
+
+# call main
 if __name__ == '__main__':
     main()
